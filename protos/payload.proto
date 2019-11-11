@@ -1,0 +1,12 @@
+syntax = 'proto3';
+
+message ProductInfoPayload {
+    message Attributes {
+        string type = 1;
+        string url = 2;
+    }
+    string Id = 2;
+    string Name = 3;
+    string ProductCode = 4;
+    Attributes attributes = 7;
+}
