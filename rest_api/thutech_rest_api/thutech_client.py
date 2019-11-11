@@ -18,11 +18,14 @@ from sawtooth_sdk.protobuf.batch_pb2 import Batch
 from thutech_protobuf import payload_pb2
 from thutech_addressing import addresser
 
+
+class TransactionNotFound(Exception):
+    pass
+
 # The Transaction Family Name
 FAMILY_NAME = 'thutech'
 FAMILY_VERSION = '1.0'
 # TF Prefix is first 6 characters of SHA-512("cookiejar"), a4d219
-
 
 
 
@@ -71,9 +74,12 @@ class ThutechClient(object):
     def is_product_already_exist(self, product_address):
         url = "{}/state/{}".format(self._base_url, product_address)
         response = requests.get(url)
+        print('......... check product status')
+        print(response.json())
         if not response.ok:
-            return True
-        return False
+            if response.json()['error']['code'] == 75:
+                return False
+        return True
 
     # ------------------------------------------------------------ #
     #                   Action method                              #
@@ -95,6 +101,8 @@ class ThutechClient(object):
         except ConnectionRefusedError as err:
             # TODO: add logger
             return False, "CONNECTION_REFUSED"
+        except TransactionNotFound as e:
+            return False, str(e)
 
     def get_product(self, product_id):
         try:
@@ -128,11 +136,11 @@ class ThutechClient(object):
         try:
             if data is not None:
                 result = requests.post(url, headers=headers, data=data)
-                print("result if data is none")
+                print("result if data")
                 print(result.json(), result.status_code)
             else:
                 result = requests.get(url, headers=headers)
-                print("result if data: ")
+                print("result if no data: ")
                 print(result.json(), result.status_code)
                 # print(dir(result))
 
@@ -178,6 +186,7 @@ class ThutechClient(object):
         transaction_list = []
 
         # Create a transaction list from payload data
+        print(payload_data)
         for data in payload_data:
             # Construct the address where we'll store our state.
             # We just have one input and output address (the same one).
@@ -187,6 +196,7 @@ class ThutechClient(object):
 
             # if product already exist with this ID, go next
             if self.is_product_already_exist(product_address):
+                print("............product already exists")
                 continue
 
             # create proto-buff object and encode data
@@ -216,6 +226,11 @@ class ThutechClient(object):
             transaction_list.append(transaction)
 
         # Create a BatchHeader from transaction_list above.
+        print("....Total {} transaction found".format(transaction_list))
+        if len(transaction_list) == 0:
+            print("..........no transaction found. existing...")
+            raise TransactionNotFound("no transaction found.")
+
         header = BatchHeader(
             signer_public_key=self._public_key,
             transaction_ids=[txn.header_signature for txn in transaction_list]

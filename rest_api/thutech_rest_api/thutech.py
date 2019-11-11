@@ -19,17 +19,6 @@ def _get_private_keyfile(key_name):
     return '{}/{}.priv'.format(key_dir, key_name)
 
 
-payload = {
-        "attributes": {
-            "type": "Product2",
-            "url": "/services/data/v47.0/sobjects/Product2/01t2v00000AsUEoAAN"
-        },
-        "Id": "01t2v00000AsUEoAAN",
-        "Name": "GenWatt Diesel 200kW",
-        "ProductCode": "GC1040"
-    }
-
-
 @app.route('/api/v1/add-product/', methods=['POST'])
 def add_product():
     if request.method == 'POST':
@@ -37,7 +26,7 @@ def add_product():
         product_list = request.get_json()
         if not isinstance(product_list, list):
             return {"status": "invalid data"}
-        print(payload)
+        print(product_list)
         priv_key_file = _get_private_keyfile(KEY_NAME)
         client = ThutechClient(base_url=DEFAULT_URL, key_file=priv_key_file)
         created, response = client.add_product(product_list)

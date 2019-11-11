@@ -30,16 +30,20 @@ services:
     command: |
       bash -c "
         if [ ! -f /etc/sawtooth/keys/validator.priv ]; then
+          echo '........no validator key found'
           sawadm keygen
           sawtooth keygen my_key
           sawset genesis -k /root/.sawtooth/keys/my_key.priv
+          echo '........key generated....'
           sawset proposal create \
                     -k /root/.sawtooth/keys/my_key.priv \
                     sawtooth.consensus.algorithm.name=Devmode \
                     sawtooth.consensus.algorithm.version=0.1 \
                     -o config.batch
           sawadm genesis config-genesis.batch config.batch
+          echo '.......genesis key configured...'
         fi;
+        echo '........validator key found. starting validator....'
         sawtooth-validator -vv \
           --endpoint tcp://validator:8800 \
           --bind component:tcp://eth0:4004 \

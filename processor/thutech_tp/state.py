@@ -7,6 +7,7 @@ class ThutechState(object):
         self._timeout = timeout
 
     def set_product(self, product_id, payload):
+        print("")
         """
         Create new product state
         """
