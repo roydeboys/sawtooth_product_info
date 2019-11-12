@@ -150,5 +150,15 @@ services:
       - validator
     entrypoint: intkey-tp-python -vv -C tcp://validator:4004
 
-
+  db:
+    image: "postgres"
+    container_name: "postgres_thutech"
+    environment:
+      - POSTGRES_USER=thutech_admin
+      - POSTGRES_PASSWORD=y983myAqyxfM
+      - POSTGRES_DB=thetech_db
+    ports:
+      - 54320:5432
+    volumes:
+      - /home/$USER/postgres-data/:/var/lib/postgresql/data
 
