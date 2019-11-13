@@ -4,6 +4,7 @@ from google.protobuf.json_format import MessageToJson, MessageToDict
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from .thutech_client import ThutechClient
 from .serializers import ProductSerializer
 
@@ -36,6 +37,8 @@ class InsertProduct(APIView):
 
 
 class CheckProduct(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def get(self, request, product_id):
         priv_key_file = _get_private_keyfile(KEY_NAME)
         client = ThutechClient(base_url=DEFAULT_URL, key_file=priv_key_file)

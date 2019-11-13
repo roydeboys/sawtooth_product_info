@@ -25,7 +25,7 @@ SECRET_KEY = 'ed(7wuf&*#j*a^wqmw=0pfkb6x)jw@cpovo9(oz*@hc=!x5of4'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['165.22.50.10',]
+ALLOWED_HOSTS = ['165.22.50.10', 'localhost']
 
 
 # Application definition
@@ -123,3 +123,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
+
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('Thutech',),
+}
