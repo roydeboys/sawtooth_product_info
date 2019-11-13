@@ -134,7 +134,7 @@ services:
         python3.6 client/manage.py runserver 0.0.0.0:8000
       "
     ports:
-      - 8000:8000
+      - 80:8000
     depends_on:
       - db
     environment:
