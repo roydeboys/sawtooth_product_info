@@ -1,17 +1,11 @@
 
 version: '3'
 
-#volumes:
-#  sawtooth-drive:
-#    driver: local
-#    driver_opts:
-#      type: none
-#      device: /home/$USER/sawtooth-drive
-#      o: bind
 
-networks:
-  sawtooth-network:
-    #name: sawtooth_network
+
+#networks:
+#  sawtooth-network:
+#    #name: sawtooth_network
 
 services:
   validator:
@@ -19,6 +13,7 @@ services:
     container_name: sawtooth-validator
     volumes:
       - /home/$USER/sawtooth-drive/keys:/etc/sawtooth/keys
+      - /home/$USER/sawtooth-drive/keys:/root/.sawtooth/keys
       - /home/$USER/sawtooth-drive/conf:/etc/sawtooth
       - /home/$USER/sawtooth-drive/data:/var/lib/sawtooth
       - /home/$USER/sawtooth-drive/log:/var/log/sawtooth
@@ -115,33 +110,34 @@ services:
       # show print() message in console
       PYTHONUNBUFFERED: 1
 
-  # Client
-  thutech-rest-api:
-    build:
-      context: .
-      dockerfile: ./rest_api/Dockerfile
-    image: sawtooth-thutech-rest-api
-    container_name: thutech-rest-api
-    volumes:
-      - .:/project/thutech
-      - /home/$USER/keys:/root/.sawtooth/keys/
-      #- 'key-volume: /root/.sawtooth/keys'
-    ports:
-      - '8000:8000'
-    depends_on:
-      - thutech-shell
-    command: |
-      bash -c "
-        thutech-protogen
-        thutech-rest-api \
-          -B simple-supply-rest-api:8000 \
-          -C validator:4004 \
-          --db-host postgres \
-          -vv
-      "
-    environment:
-      # show print() message in console
-      PYTHONUNBUFFERED: 1
+#  # Client
+#  thutech-rest-api:
+#    build:
+#      context: .
+#      dockerfile: ./rest_api/Dockerfile
+#    image: sawtooth-thutech-rest-api
+#    container_name: thutech-rest-api
+#    volumes:
+#      - .:/project/thutech
+#      - /home/$USER/keys:/root/.sawtooth/keys/
+#      #- 'key-volume: /root/.sawtooth/keys'
+#    ports:
+#      - '8000:8000'
+#    depends_on:
+#      - thutech-shell
+#    command: |
+#      bash -c "
+#        thutech-protogen
+#        thutech-rest-api \
+#          -B simple-supply-rest-api:8000 \
+#          -C validator:4004 \
+#          --db-host postgres \
+#          -vv
+#      "
+#    environment:
+#      # show print() message in console
+#      # remove from final version and add logger.
+#      PYTHONUNBUFFERED: 1
 
   intkey-tp-python:
     image: hyperledger/sawtooth-intkey-tp-python:chime
@@ -151,14 +147,38 @@ services:
     entrypoint: intkey-tp-python -vv -C tcp://validator:4004
 
   db:
-    image: "postgres"
+    image: "postgres:alpine"
     container_name: "postgres_thutech"
+    restart: always
     environment:
+      - POSTGRES_DB=thutech_db
       - POSTGRES_USER=thutech_admin
       - POSTGRES_PASSWORD=y983myAqyxfM
-      - POSTGRES_DB=thetech_db
+
     ports:
       - 54320:5432
     volumes:
       - /home/$USER/postgres-data/:/var/lib/postgresql/data
 
+  client:
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile
+    image: thutech-client
+    container_name: thutech-client
+    volumes:
+      - .:/project/thutech
+      - /home/$USER/sawtooth-drive/keys:/root/.sawtooth/keys
+    command: |
+      bash -c "
+        python3.6 client/manage.py migrate
+        python3.6 client/manage.py runserver 0.0.0.0:8000
+      "
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    environment:
+      # show print() message in console
+      # remove from final version and add logger.
+      PYTHONUNBUFFERED: 1

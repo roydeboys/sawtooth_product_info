@@ -4,6 +4,7 @@ import random
 import time
 import requests
 import yaml
+from os import sys, path
 
 from sawtooth_signing import create_context
 from sawtooth_signing import CryptoFactory
@@ -15,19 +16,26 @@ from sawtooth_sdk.protobuf.batch_pb2 import BatchList
 from sawtooth_sdk.protobuf.batch_pb2 import BatchHeader
 from sawtooth_sdk.protobuf.batch_pb2 import Batch
 
-from thutech_protobuf import payload_pb2
+# get project path (thutech)
+TOP_DIR = path.dirname(path.dirname(path.dirname(path.realpath(__file__))))
+
+# set folder to python-path for relative import
+sys.path.insert(0, path.join(TOP_DIR, 'addressing'))
+sys.path.insert(0, path.join(TOP_DIR, 'protobuf'))
+
 from thutech_addressing import addresser
+from thutech_protobuf import payload_pb2
 
 
+# custom exception
 class TransactionNotFound(Exception):
     pass
+
 
 # The Transaction Family Name
 FAMILY_NAME = 'thutech'
 FAMILY_VERSION = '1.0'
 # TF Prefix is first 6 characters of SHA-512("cookiejar"), a4d219
-
-
 
 
 def _hash(data):
