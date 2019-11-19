@@ -265,3 +265,4 @@ fabric.properties
 .history
 
 # End of https://www.gitignore.io/api/python,django,pycharm,visualstudiocode
+.env

@@ -14,7 +14,7 @@ RUN apt-get install -y --allow-unauthenticated -q python3-grpcio-tools \
 
 
 # Set work directory
-WORKDIR /project/thutech
+WORKDIR /project/thutech/client
 COPY . /project/thutech/
 
-RUN pip3 install -r client/requirements.txt
+RUN pip3 install -r requirements.txt

@@ -1,7 +1,7 @@
 import requests
 
 
-class GetProductList:
+class Product:
     def __init__(self, client_id, client_secret, refresh_token):
         self.client_id = client_id
         self.client_secret = client_secret

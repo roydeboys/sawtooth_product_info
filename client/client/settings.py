@@ -11,6 +11,18 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import environ
+from celery.schedules import crontab
+
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, False)
+)
+# reading .env file
+environ.Env.read_env()
+
+# False if not in os.environ
+DEBUG = env('DEBUG')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,10 +32,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'ed(7wuf&*#j*a^wqmw=0pfkb6x)jw@cpovo9(oz*@hc=!x5of4'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
 
 ALLOWED_HOSTS = ['165.22.50.10', 'localhost']
 
@@ -78,9 +90,9 @@ WSGI_APPLICATION = 'client.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'thutech_db',
-        'USER': 'thutech_admin',
-        'PASSWORD': 'y983myAqyxfM',
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
         'HOST': 'db', # set in docker-compose.yml
         'PORT': 5432 # default postgres port
     }
@@ -132,4 +144,23 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Thutech',),
+}
+
+# saleforce
+CLIENT_ID = env('CLIENT_ID')
+CLIENT_SECRET = env('CLIENT_SECRET')
+REFRESH_TOKEN = env('REFRESH_TOKEN')
+
+# celery
+CELERY_BROKER_URL = 'redis://redis:6379'
+CELERY_RESULT_BACKEND = 'redis://redis:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+CELERY_BEAT_SCHEDULE = {
+    'collect_and_store_product_every_hour': {
+        'task': 'product.tasks.collect_and_store_products',
+        'schedule': crontab()  # execute every minute
+    }
 }

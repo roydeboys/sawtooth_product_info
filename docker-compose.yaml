@@ -117,7 +117,7 @@ services:
     ports:
       - 54320:5432
     volumes:
-      - /home/$USER/postgres-data/:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
 
   client:
     build:
@@ -137,10 +137,32 @@ services:
       - 80:8000
     depends_on:
       - db
+      - redis
     environment:
       # show print() message in console
       # remove from final version and add logger.
       PYTHONUNBUFFERED: 1
+
+  redis:
+    image: "redis:alpine"
+
+  celery:
+    build: .
+    command: celery -A client worker -l info
+    volumes:
+      - .:/project/thutech
+    depends_on:
+      - db
+      - redis
+
+  celery-beat:
+    build: .
+    command: celery -A client beat -l info --pidfile=/opt/celeryd.pid
+    volumes:
+      - .:/project/thutech
+    depends_on:
+      - db
+      - redis
 
 volumes:
   sawtooth-drive-keys:
@@ -148,3 +170,4 @@ volumes:
   sawtooth-drive-data:
   sawtooth-drive-log:
   sawtooth-drive-policy:
+  postgres_data:
