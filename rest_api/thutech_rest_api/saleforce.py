@@ -34,13 +34,17 @@ api_url = "https://thutechs-dev-ed.my.salesforce.com/services/apexrest/Products"
 response = requests.get(api_url, headers=headers)
 print(response)
 # pprint.pprint(response.json())
-products = response.json()
+#products = response.json()
+print(response.text)
 import unicodedata
 
 
-for product in products:
-    pid = product["Id"]
-    # convert unicode to str
-    pid_str = unicodedata.normalize('NFKD', pid).encode('ascii', 'ignore')
-    print(pid_str)
+# for product in products:
+#     print("----------------------------")
+#     print(product)
+#     print("-----------------")
+#     pid = product["Id"]
+#     # convert unicode to str
+#     pid_str = unicodedata.normalize('NFKD', pid).encode('ascii', 'ignore')
+#     print(pid_str)
 
