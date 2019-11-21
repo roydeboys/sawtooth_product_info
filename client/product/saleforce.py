@@ -1,4 +1,5 @@
 import requests
+import datetime
 
 
 class Product:
@@ -7,7 +8,7 @@ class Product:
         self.client_secret = client_secret
         self.refresh_token = refresh_token
         self.token_url = "https://login.salesforce.com/services/oauth2/token"
-        self.api_url = "https://thutechs-dev-ed.my.salesforce.com/services/apexrest/Products"
+        self.api_url = "https://thutechs-dev-ed.my.salesforce.com/services/apexrest/Products/{}"
 
     def get_token(self):
         params = {
@@ -22,7 +23,7 @@ class Product:
         else:
             raise Exception("token not found")
 
-    def get_products(self):
+    def get_products(self, date):
         try:
             access_token = self.get_token()
             headers = {
@@ -30,8 +31,12 @@ class Product:
                 'Accept-Encoding': 'gzip',
                 'Authorization': 'Bearer %s' % access_token
             }
-            response = requests.get(self.api_url, headers=headers)
+            #date = datetime.date.today().strftime("%Y-%m-%d")
+            url = self.api_url.format(date)
+            response = requests.get(url, headers=headers)
+            print("product response: ", response)
+            print("text response: ", response.text)
             if response.ok:
-                return response.text
+                return response.json()
         except Exception as e:
             raise Exception(str(e))

@@ -21,6 +21,16 @@ def _get_private_keyfile(key_name):
     return '{}/{}.priv'.format(key_dir, key_name)
 
 
+def insert_product_to_blockchain(product_list):
+    priv_key_file = _get_private_keyfile(KEY_NAME)
+    client = ThutechClient(base_url=DEFAULT_URL, key_file=priv_key_file)
+    # remove CreatedDate from product info
+
+    created, response = client.add_product(product_list)
+    if created:
+        return "SUCCESS"
+    return "FAILED"
+
 class InsertProduct(APIView):
     def post(self, request):
         serializer = ProductSerializer(data=request.data, many=True)

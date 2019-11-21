@@ -1,3 +1,11 @@
 from django.db import models
 
-# Create your models here.
+
+class ProductQue(models.Model):
+    date = models.DateField(auto_now=True, unique=True)
+    is_resolved = models.BooleanField(default=False)
+    status = models.CharField(max_length=250, blank=True, null=True)
+
+    def mark_resolved(self):
+        self.is_resolved = True
+        self.save()

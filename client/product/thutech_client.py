@@ -196,6 +196,9 @@ class ThutechClient(object):
         # Create a transaction list from payload data
         print(payload_data)
         for data in payload_data:
+            print("................payload data............")
+            print(data)
+            data.pop("CreatedDate")
             # Construct the address where we'll store our state.
             # We just have one input and output address (the same one).
             product_id = data["Id"]
@@ -203,6 +206,7 @@ class ThutechClient(object):
             product_address = addresser.get_product_address(product_id)
 
             # if product already exist with this ID, go next
+            # TODO: remove in final version
             if self.is_product_already_exist(product_address):
                 print("............product already exists")
                 continue

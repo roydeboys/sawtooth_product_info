@@ -130,6 +130,7 @@ services:
       - sawtooth-drive-keys:/root/.sawtooth/keys
     command: |
       bash -c "
+        python3.6 client/manage.py makemigrations
         python3.6 client/manage.py migrate
         python3.6 client/manage.py runserver 0.0.0.0:8000
       "
@@ -151,6 +152,7 @@ services:
     command: celery -A client worker -l info
     volumes:
       - .:/project/thutech
+      - sawtooth-drive-keys:/root/.sawtooth/keys
     depends_on:
       - db
       - redis
@@ -160,6 +162,7 @@ services:
     command: celery -A client beat -l info --pidfile=/opt/celeryd.pid
     volumes:
       - .:/project/thutech
+      - sawtooth-drive-keys:/root/.sawtooth/keys
     depends_on:
       - db
       - redis
