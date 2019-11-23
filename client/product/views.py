@@ -47,7 +47,7 @@ class InsertProduct(APIView):
 
 
 class CheckProduct(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = ()
 
     def get(self, request, product_id):
         priv_key_file = _get_private_keyfile(KEY_NAME)
