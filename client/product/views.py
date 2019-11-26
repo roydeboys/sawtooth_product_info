@@ -1,17 +1,29 @@
 import os
 import logging
+import hashlib
 from google.protobuf.json_format import MessageToJson, MessageToDict
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from subscriber.models import BlockInfo
 from .thutech_client import ThutechClient
 from .serializers import ProductSerializer
+from subscriber.serializers import BlockInfoSerializer
 
 logger = logging.getLogger(__name__)
 
 KEY_NAME = 'my_key'
 DEFAULT_URL = 'http://rest-api:8008'
+
+FAMILY_NAME = 'thutech_subscriber'
+FAMILY_VERSION = '1.0'
+NAMESPACE = hashlib.sha512(FAMILY_NAME.encode('utf-8')).hexdigest()[:6]
+
+
+def get_product_address(product_id):
+    return NAMESPACE + hashlib.sha512(
+        product_id.encode('utf-8')).hexdigest()[:64]
 
 
 def _get_private_keyfile(key_name):
@@ -30,6 +42,7 @@ def insert_product_to_blockchain(product_list):
     if created:
         return "SUCCESS"
     return "FAILED"
+
 
 class InsertProduct(APIView):
     def post(self, request):
@@ -54,9 +67,15 @@ class CheckProduct(APIView):
         client = ThutechClient(base_url=DEFAULT_URL, key_file=priv_key_file)
         try:
             product_data = client.get_product(product_id)
-            print(product_data)
-            data = MessageToDict(product_data, preserving_proto_field_name=True)
-            print(data)
+            product_data = MessageToDict(product_data, preserving_proto_field_name=True)
+            product_address = get_product_address(product_id)
+            block_obj = BlockInfo.objects.get(address=product_address)
+            serializer = BlockInfoSerializer(block_obj)
+            block_data = serializer.data
+            data = {
+                "block_data": block_data,
+                "product_data": product_data
+            }
             return Response(data, status=status.HTTP_200_OK)
         except Exception as e:
             print("error: ", e)

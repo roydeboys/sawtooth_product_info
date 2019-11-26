@@ -16,7 +16,7 @@ from sawtooth_sdk.protobuf.batch_pb2 import BatchList
 from sawtooth_sdk.protobuf.batch_pb2 import BatchHeader
 from sawtooth_sdk.protobuf.batch_pb2 import Batch
 
-# get project path (thutech)
+# get project path (thutech_subscriber)
 TOP_DIR = path.dirname(path.dirname(path.dirname(path.realpath(__file__))))
 
 # set folder to python-path for relative import
@@ -33,7 +33,7 @@ class TransactionNotFound(Exception):
 
 
 # The Transaction Family Name
-FAMILY_NAME = 'thutech'
+FAMILY_NAME = 'thutech_subscriber'
 FAMILY_VERSION = '1.0'
 # TF Prefix is first 6 characters of SHA-512("cookiejar"), a4d219
 
@@ -198,7 +198,7 @@ class ThutechClient(object):
         for data in payload_data:
             print("................payload data............")
             print(data)
-            data.pop("CreatedDate")
+            data.pop("CreatedDate", None)
             # Construct the address where we'll store our state.
             # We just have one input and output address (the same one).
             product_id = data["Id"]

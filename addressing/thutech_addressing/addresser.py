@@ -1,7 +1,7 @@
 import hashlib
 
 
-FAMILY_NAME = 'thutech'
+FAMILY_NAME = 'thutech_subscriber'
 FAMILY_VERSION = '1.0'
 NAMESPACE = hashlib.sha512(FAMILY_NAME.encode('utf-8')).hexdigest()[:6]
 # AGENT_PREFIX = '00'
