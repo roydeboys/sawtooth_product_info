@@ -133,12 +133,32 @@ services:
         python3.6 client/manage.py makemigrations
         python3.6 client/manage.py migrate
         python3.6 client/manage.py runserver 0.0.0.0:8000
+
       "
     ports:
       - 80:8000
     depends_on:
+      - validator
       - db
       - redis
+    environment:
+      # show print() message in console
+      # remove from final version and add logger.
+      PYTHONUNBUFFERED: 1
+
+  subscriber:
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile
+    volumes:
+      - .:/project/thutech
+    command: |
+      bash -c "
+        python3.6 client/manage.py subscribe_event
+      "
+    depends_on:
+      - validator
+      - client
     environment:
       # show print() message in console
       # remove from final version and add logger.

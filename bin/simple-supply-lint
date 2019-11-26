@@ -43,6 +43,6 @@ export PYTHONPATH=$PYTHONPATH:$TOP_DIR/rest_api
 lint rest_api/simple_supply_rest_api || ret_val=1
 
 export PYTHONPATH=$PYTHONPATH:$TOP_DIR/subscriber
-lint subscriber/simple_supply_subscriber || ret_val=1
+lint subscriber/thutech_subscriber || ret_val=1
 
 exit $ret_val
