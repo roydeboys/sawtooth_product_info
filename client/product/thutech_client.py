@@ -240,7 +240,7 @@ class ThutechClient(object):
         print("....Total {} transaction found".format(transaction_list))
         if len(transaction_list) == 0:
             print("..........no transaction found. existing...")
-            raise TransactionNotFound("no transaction found.")
+            raise TransactionNotFound("Data Already exists.")
 
         header = BatchHeader(
             signer_public_key=self._public_key,
