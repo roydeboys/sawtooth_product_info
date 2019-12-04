@@ -14,3 +14,4 @@ WORKDIR /project/thutech
 ENV PATH $PATH:/project/thutech/bin
 
 CMD ['thutech-tp']
+# CMD ['thutech-protogen']

@@ -1,6 +1,7 @@
+import datetime
 from django.conf import settings
 from celery import shared_task
-from .saleforce import Product
+from .saleforce import SaleforceProduct
 from .models import ProductQue
 from .views import insert_product_to_blockchain
 
@@ -25,7 +26,7 @@ def collect_and_store_products():
     """
     try:
         # Create new que first for today's que
-        ProductQue.objects.create()
+        ProductQue.objects.create(date=datetime.datetime.now())
         print("que created")
     except:
         print("que already exists, passing....")
@@ -36,7 +37,7 @@ def collect_and_store_products():
     print("Que list is: ", que_list)
     try:
         # Init saleforce product api
-        product_obj = Product(client_id=client_id, client_secret=client_secret, refresh_token=refresh_token)
+        product_obj = SaleforceProduct(client_id=client_id, client_secret=client_secret, refresh_token=refresh_token)
         if que_list:
             print("in if que")
             for que in que_list:

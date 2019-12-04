@@ -67,11 +67,15 @@ class CheckProduct(APIView):
         client = ThutechClient(base_url=DEFAULT_URL, key_file=priv_key_file)
         try:
             product_data = client.get_product(product_id)
+            print("product data before: ", product_data)
             product_data = MessageToDict(product_data, preserving_proto_field_name=True)
             product_address = get_product_address(product_id)
-            block_obj = BlockInfo.objects.get(address=product_address)
-            serializer = BlockInfoSerializer(block_obj)
-            block_data = serializer.data
+            try:
+                block_obj = BlockInfo.objects.get(address=product_address)
+                serializer = BlockInfoSerializer(block_obj)
+                block_data = serializer.data
+            except:
+                block_data = None
             data = {
                 "block_data": block_data,
                 "product_data": product_data

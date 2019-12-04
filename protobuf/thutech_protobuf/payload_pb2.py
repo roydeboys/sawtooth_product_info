@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x1ethutech_protobuf/payload.proto\"\xa0\x01\n\x12ProductInfoPayload\x12\n\n\x02Id\x18\x02 \x01(\t\x12\x0c\n\x04Name\x18\x03 \x01(\t\x12\x13\n\x0bProductCode\x18\x04 \x01(\t\x12\x32\n\nattributes\x18\x07 \x01(\x0b\x32\x1e.ProductInfoPayload.Attributes\x1a\'\n\nAttributes\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\tb\x06proto3')
+  serialized_pb=_b('\n\x1ethutech_protobuf/payload.proto\"\x96\x02\n\x12ProductInfoPayload\x12\n\n\x02Id\x18\x02 \x01(\t\x12\x0c\n\x04Name\x18\x03 \x01(\t\x12\x13\n\x0bProductCode\x18\x04 \x01(\t\x12\x13\n\x0b\x43reatedDate\x18\x05 \x01(\t\x12\x0f\n\x07\x43ity__c\x18\x06 \x01(\t\x12\x12\n\nCountry__c\x18\x07 \x01(\t\x12\x15\n\rPostalCode__c\x18\x08 \x01(\t\x12\x10\n\x08State__c\x18\t \x01(\t\x12\x11\n\tStreet__c\x18\n \x01(\t\x12\x32\n\nattributes\x18\x0b \x01(\x0b\x32\x1e.ProductInfoPayload.Attributes\x1a\'\n\nAttributes\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\tb\x06proto3')
 )
 
 
@@ -58,8 +58,8 @@ _PRODUCTINFOPAYLOAD_ATTRIBUTES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=156,
-  serialized_end=195,
+  serialized_start=274,
+  serialized_end=313,
 )
 
 _PRODUCTINFOPAYLOAD = _descriptor.Descriptor(
@@ -91,8 +91,50 @@ _PRODUCTINFOPAYLOAD = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='attributes', full_name='ProductInfoPayload.attributes', index=3,
-      number=7, type=11, cpp_type=10, label=1,
+      name='CreatedDate', full_name='ProductInfoPayload.CreatedDate', index=3,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='City__c', full_name='ProductInfoPayload.City__c', index=4,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='Country__c', full_name='ProductInfoPayload.Country__c', index=5,
+      number=7, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='PostalCode__c', full_name='ProductInfoPayload.PostalCode__c', index=6,
+      number=8, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='State__c', full_name='ProductInfoPayload.State__c', index=7,
+      number=9, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='Street__c', full_name='ProductInfoPayload.Street__c', index=8,
+      number=10, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='attributes', full_name='ProductInfoPayload.attributes', index=9,
+      number=11, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -110,7 +152,7 @@ _PRODUCTINFOPAYLOAD = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=35,
-  serialized_end=195,
+  serialized_end=313,
 )
 
 _PRODUCTINFOPAYLOAD_ATTRIBUTES.containing_type = _PRODUCTINFOPAYLOAD

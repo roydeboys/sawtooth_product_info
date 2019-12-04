@@ -29,13 +29,13 @@ headers = {
         'Authorization': 'Bearer %s' % access_token
     }
 
-api_url = "https://thutechs-dev-ed.my.salesforce.com/services/apexrest/Products"
+api_url = "https://thutechs-dev-ed.my.salesforce.com/services/apexrest/Products/{}".format("2019-12-03")
 
 response = requests.get(api_url, headers=headers)
 print(response)
 # pprint.pprint(response.json())
 #products = response.json()
-print(response.text)
+pprint.pprint(response.json())
 import unicodedata
 
 

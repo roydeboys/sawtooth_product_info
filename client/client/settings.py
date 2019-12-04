@@ -163,5 +163,6 @@ CELERY_BEAT_SCHEDULE = {
     'collect_and_store_product_every_hour': {
         'task': 'product.tasks.collect_and_store_products',
         'schedule': crontab(minute=29, hour=18)  # execute at 11:59 PM IST
+        #'schedule': crontab()  # execute at 11:59 PM IST
     }
 }

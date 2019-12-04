@@ -198,7 +198,6 @@ class ThutechClient(object):
         for data in payload_data:
             print("................payload data............")
             print(data)
-            data.pop("CreatedDate", None)
             # Construct the address where we'll store our state.
             # We just have one input and output address (the same one).
             product_id = data["Id"]
