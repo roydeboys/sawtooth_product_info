@@ -198,7 +198,6 @@ class ThutechClient(object):
         for data in payload_data:
             print("................payload data............")
             print(data)
-            data.pop("CreatedDate", None)
             # Construct the address where we'll store our state.
             # We just have one input and output address (the same one).
             product_id = data["Id"]
@@ -241,7 +240,7 @@ class ThutechClient(object):
         print("....Total {} transaction found".format(transaction_list))
         if len(transaction_list) == 0:
             print("..........no transaction found. existing...")
-            raise TransactionNotFound("no transaction found.")
+            raise TransactionNotFound("Data Already exists.")
 
         header = BatchHeader(
             signer_public_key=self._public_key,

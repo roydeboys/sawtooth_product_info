@@ -1,6 +1,7 @@
+import datetime
 from django.conf import settings
 from celery import shared_task
-from .saleforce import Product
+from .saleforce import SaleforceProduct
 from .models import ProductQue
 from .views import insert_product_to_blockchain
 
@@ -25,40 +26,38 @@ def collect_and_store_products():
     """
     try:
         # Create new que first for today's que
-        ProductQue.objects.create()
+        ProductQue.objects.create(date=datetime.datetime.now())
         print("que created")
-    except:
-        print("que already exists, passing....")
+    except Exception as e:
+        print(str(e))
         pass
 
     # Get all unresolved que, including today's que
     que_list = ProductQue.objects.filter(is_resolved=False)
     print("Que list is: ", que_list)
-    try:
-        # Init saleforce product api
-        product_obj = Product(client_id=client_id, client_secret=client_secret, refresh_token=refresh_token)
-        if que_list:
-            print("in if que")
-            for que in que_list:
-                print(que.date)
-                # get product list from saleforces api
-                products = product_obj.get_products(que.date)
-                print("products: ", products)
-                if products:
-                    # insert products to blockchanin
-                    response = insert_product_to_blockchain(products)
-                    print("response")
-                    if response == "SUCCESS":
-                        que.mark_resolved()
-                    pass
+
+    for que in que_list:
+        print(que.date)
+        # get product list from saleforces api
+        try:
+            product_obj = SaleforceProduct(client_id=client_id, client_secret=client_secret,
+                                           refresh_token=refresh_token)
+            products = product_obj.get_products(que.date)
+            print("products: ", products)
+            if products:
+                # insert products to blockchanin
+                is_inserted, response = insert_product_to_blockchain(products)
+                if is_inserted:
+                    que.mark_resolved(response)
                 else:
-                    que.mark_resolved()
-        else:
-            print("No que found..")
-    except ConnectionError as e:
-        print(e)
-        pass
-    except Exception as e:
-        print(e)
-        # TODO: use logger
-        pass
+                    # store blockchain error status to db
+                    que.mark_unresolved(response)
+            else:
+                # If no data found, mark as resolved
+                que.mark_resolved(status="No data Found in saleforce")
+        except ConnectionError as e:
+            # mark unresolved with status
+            que.mark_unresolved(e)
+        except Exception as e:
+            que.mark_unresolved(e)
+

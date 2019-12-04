@@ -8,5 +8,11 @@ message ProductInfoPayload {
     string Id = 2;
     string Name = 3;
     string ProductCode = 4;
-    Attributes attributes = 7;
+    string CreatedDate = 5;
+    string City__c = 6;
+    string Country__c = 7;
+    string PostalCode__c = 8;
+    string State__c = 9;
+    string Street__c = 10;
+    Attributes attributes = 11;
 }

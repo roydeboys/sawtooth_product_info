@@ -130,6 +130,8 @@ services:
       - sawtooth-drive-keys:/root/.sawtooth/keys
     command: |
       bash -c "
+        echo 'in bash command'
+        bin/thutech-protogen
         python3.6 client/manage.py makemigrations
         python3.6 client/manage.py migrate
         python3.6 client/manage.py runserver 0.0.0.0:8000

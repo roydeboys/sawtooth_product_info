@@ -37,11 +37,8 @@ def insert_product_to_blockchain(product_list):
     priv_key_file = _get_private_keyfile(KEY_NAME)
     client = ThutechClient(base_url=DEFAULT_URL, key_file=priv_key_file)
     # remove CreatedDate from product info
+    return client.add_product(product_list)
 
-    created, response = client.add_product(product_list)
-    if created:
-        return "SUCCESS"
-    return "FAILED"
 
 
 class InsertProduct(APIView):
@@ -67,11 +64,15 @@ class CheckProduct(APIView):
         client = ThutechClient(base_url=DEFAULT_URL, key_file=priv_key_file)
         try:
             product_data = client.get_product(product_id)
+            print("product data before: ", product_data)
             product_data = MessageToDict(product_data, preserving_proto_field_name=True)
             product_address = get_product_address(product_id)
-            block_obj = BlockInfo.objects.get(address=product_address)
-            serializer = BlockInfoSerializer(block_obj)
-            block_data = serializer.data
+            try:
+                block_obj = BlockInfo.objects.get(address=product_address)
+                serializer = BlockInfoSerializer(block_obj)
+                block_data = serializer.data
+            except:
+                block_data = None
             data = {
                 "block_data": block_data,
                 "product_data": product_data
