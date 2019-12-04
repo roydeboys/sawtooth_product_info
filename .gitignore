@@ -268,3 +268,5 @@ fabric.properties
 .env
 
 *.db
+celerybeat-schedule.db
+
