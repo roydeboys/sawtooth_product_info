@@ -6,10 +6,6 @@ from django.core.management.base import BaseCommand
 from sawtooth_sdk.protobuf.client_event_pb2 import ClientEventsSubscribeRequest
 from sawtooth_sdk.protobuf.client_event_pb2\
     import ClientEventsSubscribeResponse
-from sawtooth_sdk.protobuf.client_event_pb2\
-    import ClientEventsUnsubscribeRequest
-from sawtooth_sdk.protobuf.client_event_pb2\
-    import ClientEventsUnsubscribeResponse
 from sawtooth_sdk.protobuf.events_pb2 import EventList
 from sawtooth_sdk.protobuf.events_pb2 import EventSubscription
 from sawtooth_sdk.protobuf.events_pb2 import EventFilter
@@ -24,13 +20,17 @@ FAMILY_VERSION = '1.0'
 NAMESPACE = hashlib.sha512(FAMILY_NAME.encode('utf-8')).hexdigest()[:6]
 
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 NULL_BLOCK_ID = '0000000000000000'
 validator_url = 'tcp://validator:4004'
 
 
 def subscribe_event():
-    print("event function start..")
+    """
+     A custom management command to store block information of each block data by event subscription.
+     this command is calling from docker-compose file
+    """
+    logger.info("event function start..")
     # Setup a connection to the validator
     ctx = zmq.Context()
     socket = ctx.socket(zmq.DEALER)
@@ -40,6 +40,7 @@ def subscribe_event():
     # Submit the Event Subscription  #
     # -------------------------------#
 
+    # subscribe both both "block commit" and "state-delta" event
     block_sub = EventSubscription(event_type='sawtooth/block-commit')
     delta_sub = EventSubscription(
         event_type='sawtooth/state-delta',
@@ -69,16 +70,13 @@ def subscribe_event():
 
     resp = socket.recv_multipart()[-1]
 
-
     # Parse the message wrapper
     msg = Message()
     msg.ParseFromString(resp)
 
-    print("response before loop: ", msg.content)
-
     # Validate the response type
     if msg.message_type != Message.CLIENT_EVENTS_SUBSCRIBE_RESPONSE:
-        print("Unexpected message type")
+        logger.error("Unexpected message type")
         return
 
     # Parse the response
@@ -87,11 +85,9 @@ def subscribe_event():
 
     # Validate the response status
     if response.status != ClientEventsSubscribeResponse.OK:
-      print("Subscription failed: {}".format(response.response_message))
       return
 
     while True:
-        print("in while loop..")
         resp = socket.recv_multipart()[-1]
 
         # Parse the message wrapper
@@ -100,7 +96,6 @@ def subscribe_event():
 
         # Validate the response type
         if msg.message_type != Message.CLIENT_EVENTS:
-            print("Unexpected message type")
             return
 
         # Parse the response
@@ -110,8 +105,6 @@ def subscribe_event():
             "address": []
         }
         event_data = MessageToDict(events)
-        print("event data: ", event_data)
-        print("-----------------------------------")
         events_list = event_data["events"]
         for event in events_list:
             attributes = event["attributes"]
@@ -120,12 +113,10 @@ def subscribe_event():
                 key = attr["key"]
                 value = attr["value"]
                 if key == 'address':
-                    print(block_info["address"])
                     block_info["address"].append(value)
                 else:
                     block_info[key] = value
 
-        print("block info data: ", block_info)
         address_list = block_info["address"]
         for address in address_list:
             BlockInfo.objects.create(
@@ -135,11 +126,11 @@ def subscribe_event():
                 previous_block_id=block_info["previous_block_id"],
                 address=address,
             )
+            logger.info("blockinfo subscription created..")
 
 
 class Command(BaseCommand):
     help = 'Subscribe block event'
 
     def handle(self, *args, **kwargs):
-        print("in command..")
         subscribe_event()

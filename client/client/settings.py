@@ -37,7 +37,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 
 
-ALLOWED_HOSTS = ['165.22.50.10', 'localhost']
+ALLOWED_HOSTS = ['165.22.50.10', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -166,3 +166,5 @@ CELERY_BEAT_SCHEDULE = {
         #'schedule': crontab()  # execute at 11:59 PM IST
     }
 }
+
+from .logger import LOGGING

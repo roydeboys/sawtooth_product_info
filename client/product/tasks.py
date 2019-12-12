@@ -1,4 +1,5 @@
 import datetime
+import logging
 from django.conf import settings
 from celery import shared_task
 from .saleforce import SaleforceProduct
@@ -8,6 +9,8 @@ from .views import insert_product_to_blockchain
 client_id = settings.CLIENT_ID
 client_secret = settings.CLIENT_SECRET
 refresh_token = settings.REFRESH_TOKEN
+
+logger = logging.getLogger(__name__)
 
 
 @shared_task
@@ -29,21 +32,18 @@ def collect_and_store_products():
         ProductQue.objects.create(date=datetime.datetime.now())
         print("que created")
     except Exception as e:
-        print(str(e))
+        logger.error(e)
         pass
 
     # Get all unresolved que, including today's que
     que_list = ProductQue.objects.filter(is_resolved=False)
-    print("Que list is: ", que_list)
 
     for que in que_list:
-        print(que.date)
         # get product list from saleforces api
         try:
             product_obj = SaleforceProduct(client_id=client_id, client_secret=client_secret,
                                            refresh_token=refresh_token)
             products = product_obj.get_products(que.date)
-            print("products: ", products)
             if products:
                 # insert products to blockchanin
                 is_inserted, response = insert_product_to_blockchain(products)
@@ -58,6 +58,8 @@ def collect_and_store_products():
         except ConnectionError as e:
             # mark unresolved with status
             que.mark_unresolved(e)
+            logger.error(e)
         except Exception as e:
             que.mark_unresolved(e)
+            logger.error(e)
 

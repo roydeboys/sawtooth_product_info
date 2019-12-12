@@ -1,5 +1,9 @@
 from django.db import models
 
+"""
+    Store block data for each transaction
+"""
+
 
 class BlockInfo(models.Model):
     block_num = models.BigIntegerField()
