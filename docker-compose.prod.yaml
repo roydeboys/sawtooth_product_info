@@ -193,7 +193,7 @@ services:
     volumes:
       - static-volume:/project/thutech/client/static
     ports:
-      - 1337:80
+      - 80:80
     depends_on:
       - client
 
