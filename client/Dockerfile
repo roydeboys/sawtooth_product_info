@@ -14,7 +14,12 @@ RUN apt-get install -y --allow-unauthenticated -q python3-grpcio-tools \
 
 
 # Set work directory
-WORKDIR /project/thutech
+
 COPY . /project/thutech/
 
-RUN pip3 install -r client/requirements.txt
+WORKDIR /project/thutech/client
+RUN pip3 install -r requirements.txt
+
+ENV PATH $PATH:/project/thutech/bin
+CMD ["thutech-protogen"]
+

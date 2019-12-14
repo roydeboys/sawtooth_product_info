@@ -1,0 +1,209 @@
+
+version: '3'
+
+
+services:
+  validator:
+    image: hyperledger/sawtooth-validator:1.2
+    container_name: sawtooth-validator
+    volumes:
+      - sawtooth-drive-keys:/etc/sawtooth/keys
+      - sawtooth-drive-keys:/root/.sawtooth/keys
+      - sawtooth-drive-conf:/etc/sawtooth
+      - sawtooth-drive-data:/var/lib/sawtooth
+      - sawtooth-drive-log:/var/log/sawtooth
+      - sawtooth-drive-policy:/etc/sawtooth/policy
+    expose:
+      - 4004
+    ports:
+      - '4004:4004'
+    command: |
+      bash -c "
+        if [ ! -f /etc/sawtooth/keys/validator.priv ]; then
+          echo '........no validator key found'
+          sawadm keygen
+          sawtooth keygen my_key
+          sawset genesis -k /root/.sawtooth/keys/my_key.priv
+          echo '........key generated....'
+          sawset proposal create \
+                    -k /root/.sawtooth/keys/my_key.priv \
+                    sawtooth.consensus.algorithm.name=Devmode \
+                    sawtooth.consensus.algorithm.version=0.1 \
+                    -o config.batch
+          sawadm genesis config-genesis.batch config.batch
+          echo '.......genesis key configured...'
+        fi;
+        echo '........validator key found. starting validator....'
+        sawtooth-validator -vv \
+          --endpoint tcp://validator:8800 \
+          --bind component:tcp://eth0:4004 \
+          --bind network:tcp://eth0:8800 \
+          --bind consensus:tcp://eth0:5050
+      "
+    stop_signal: SIGKILL
+
+  devmode-engine:
+    image: hyperledger/sawtooth-devmode-engine-rust:1.2
+    expose:
+      - 5050
+    ports:
+      - '5050:5050'
+    container_name: sawtooth-devmode-engine-rust-default
+    depends_on:
+      - validator
+    entrypoint: devmode-engine-rust --connect tcp://validator:5050
+
+  settings-tp:
+    image: hyperledger/sawtooth-settings-tp:1.2
+    container_name: sawtooth-settings-tp
+    depends_on:
+      - validator
+    entrypoint: settings-tp -vv -C tcp://validator:4004
+
+  rest-api:
+    image: hyperledger/sawtooth-rest-api:1.2
+    container_name: sawtooth-rest-api
+    expose:
+      - 8008
+    ports:
+      - '8008:8008'
+    depends_on:
+      - validator
+    entrypoint: sawtooth-rest-api -vv -C tcp://validator:4004 --bind rest-api:8008
+
+  thutech-shell:
+#    build:
+#      context: .
+#      dockerfile: ./shell/Dockerfile
+    image: hyperledger/sawtooth-shell:chime
+    container_name: sawtooth-shell
+    depends_on:
+      - rest-api
+    volumes:
+      - .:/project/thutech
+    command: |
+      bash -c "
+        tail -f /dev/null
+      "
+
+  thutech-tp:
+    build:
+      context: .
+      dockerfile: ./processor/Dockerfile
+    image: sawtooth-thutech-tp
+    container_name: thutech-tp
+    volumes:
+      - .:/project/thutech
+    depends_on:
+      - thutech-shell
+    command: |
+      bash -c "
+        sleep 1
+        thutech-tp -v -C tcp://validator:4004
+      "
+    environment:
+      # show print() message in console
+      PYTHONUNBUFFERED: 1
+
+  db:
+    image: "postgres:alpine"
+    container_name: "postgres_thutech"
+    restart: always
+    environment:
+      - POSTGRES_DB=thutech_db
+      - POSTGRES_USER=thutech_admin
+      - POSTGRES_PASSWORD=y983myAqyxfM
+
+    ports:
+      - 54320:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  client:
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile
+    image: thutech-client
+    container_name: thutech-client
+    volumes:
+      - .:/project/thutech
+      - sawtooth-drive-keys:/root/.sawtooth/keys
+      - static-volume:/project/thutech/client/static
+    command: |
+      bash -c "
+        python3.6 manage.py makemigrations
+        python3.6 manage.py migrate
+        python3.6 manage.py collectstatic --no-input --clear
+        gunicorn client.wsgi:application --bind 0.0.0.0:8000
+      "
+    expose:
+      - 8000
+    depends_on:
+      - validator
+      - db
+      - redis
+    environment:
+      # show print() message in console
+      # remove from final version and add logger.
+      PYTHONUNBUFFERED: 1
+
+  subscriber:
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile
+    volumes:
+      - .:/project/thutech
+    command: |
+      bash -c "
+        python3.6 manage.py subscribe_event
+      "
+    depends_on:
+      - validator
+      - client
+    environment:
+      # show print() message in console
+      # remove from final version and add logger.
+      PYTHONUNBUFFERED: 1
+
+  redis:
+    image: "redis:alpine"
+
+  celery:
+    build: .
+    command: celery -A client worker -l info
+    volumes:
+      - .:/project/thutech
+      - sawtooth-drive-keys:/root/.sawtooth/keys
+    depends_on:
+      - db
+      - redis
+
+  celery-beat:
+    build: .
+    command: celery -A client beat -l info --pidfile=/opt/celeryd.pid
+    volumes:
+      - .:/project/thutech
+      - sawtooth-drive-keys:/root/.sawtooth/keys
+    depends_on:
+      - db
+      - redis
+
+  nginx:
+    build: ./client/nginx
+    volumes:
+      - static-volume:/project/thutech/client/static
+    ports:
+      - 1337:80
+    depends_on:
+      - client
+
+volumes:
+  sawtooth-drive-keys:
+  sawtooth-drive-conf:
+  sawtooth-drive-data:
+  sawtooth-drive-log:
+  sawtooth-drive-policy:
+  postgres_data:
+  static-volume:
+
+# bin/thutech-protogen
